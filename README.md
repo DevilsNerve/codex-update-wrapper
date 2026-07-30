@@ -1,6 +1,6 @@
 # Codex Update Wrapper
 
-  A lightweight Bash wrapper for the Codex CLI that checks npm for updates, offers to install the latest version, and then launches Codex.
+  A lightweight Bash wrapper for the Codex CLI that checks for npm updates, offers to install the latest version, and then launches Codex. Saves your from re-typing codex after the update.
 
   ## Features
 
