@@ -118,7 +118,7 @@
 
   ## License
 
-  This project is available for personal and noncommercial use under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+  This project is available for personal and noncommercial use under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
 
   Commercial use requires a separate written commercial license from DevilsNerve. Contact [@DevilsNerve](https://github.com/DevilsNerve) for
   commercial licensing.
