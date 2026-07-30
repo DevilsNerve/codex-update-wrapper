@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+  upstream_codex="${CODEX_UPSTREAM:-$HOME/.local/share/npm-global/bin/codex}"
+
+  if [[ ! -x "$upstream_codex" ]]; then
+      echo "Codex upstream binary not found at $upstream_codex" >&2
+      exit 127
+  fi
+
+  should_check_update=1
+
+  if [[ "${CODEX_SKIP_AUTO_UPDATE_PROMPT:-}" == "1" ]]; then
+      should_check_update=0
+  elif [[ ! -t 0 || ! -t 1 ]]; then
+      should_check_update=0
+  elif ! command -v npm >/dev/null 2>&1; then
+      should_check_update=0
+  fi
+
+  if [[ "$should_check_update" == "1" ]]; then
+      npm_root="$(npm root -g 2>/dev/null)"
+      package_json="$npm_root/@openai/codex/package.json"
+
+      if [[ -r "$package_json" ]]; then
+          installed_version="$(
+              CODEX_PACKAGE_JSON="$package_json" node -e '
+                  const metadata = JSON.parse(fs.readFileSync(packageJson, "utf8"));
+                  process.stdout.write(metadata.version || "");
+              ' 2>/dev/null
+          )"
+
+          latest_version="$(
+              timeout 5s npm view @openai/codex version --silent 2>/dev/null |
+                  tail -n 1
+          )"
+
+          if [[ -n "$installed_version" &&
+                -n "$latest_version" &&
+                "$installed_version" != "$latest_version" ]]; then
+
+              newest_version="$(
+                  printf '%s\n%s\n' "$installed_version" "$latest_version" |
+                      sort -V |
+                      tail -n 1
+              )"
+
+              if [[ "$newest_version" == "$latest_version" ]]; then
+                  printf 'Codex update available: %s -> %s\n' \
+                      "$installed_version" \
+                      "$latest_version"
+
+                  printf 'Update now with npm install -g @openai/codex@latest? [Y/n] '
+                  IFS= read -r update_answer
+
+                  case "$update_answer" in
+                      [nN]|[nN][oO])
+                          ;;
+                      *)
+                          if npm install -g @openai/codex@latest; then
+                              echo "Codex updated. Starting Codex..."
+                          else
+                              echo "Codex update failed. Starting the installed Codex version." >&2
+                          fi
+                          ;;
+                  esac
+              fi
+          fi
+      fi
+  fi
+
+  exec "$upstream_codex" "$@"
+
+  After downloading it, make it executable:
+
+  chmod +x codex
